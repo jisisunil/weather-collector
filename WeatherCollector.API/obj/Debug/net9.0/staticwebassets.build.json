@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "wk+p8UzdU+9c0dbCWjAcYuwpoDj/F6RUqUD43Wb6mEk=",
+  "Source": "WeatherCollector.API",
+  "BasePath": "_content/WeatherCollector.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
