@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  imageRepository: 'weather-collector'
+  containerRegistry: 'weathercollector.azurecr.io'
+  dockerfilePath: 'WeatherCollector.API/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Install .NET 9'
+      inputs:
+        packageType: 'sdk'
+        version: '9.0.x'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore packages'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration Release'
+
+- stage: Docker
+  displayName: 'Build and Push Docker Image'
+  dependsOn: Build
+  jobs:
+  - job: Docker
+    displayName: 'Docker Build and Push'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Build and Push to ACR'
+      inputs:
+        azureSubscription: 'Azure subscription 1'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az acr login --name weathercollector
+          docker build -t $(containerRegistry)/$(imageRepository):$(tag) $(dockerfilePath) -f $(dockerfilePath)
+          docker push $(containerRegistry)/$(imageRepository):$(tag)
